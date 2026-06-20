@@ -1,0 +1,154 @@
+<section class="page-header">
+  <div>
+    <p class="eyebrow">Configuracion</p>
+    <h1>Tarjetas de credito</h1>
+  </div>
+</section>
+
+<section class="panel">
+  <form class="form-grid cards-form" action="/tarjetas" method="post">
+    <label>
+      Nombre de tarjeta
+      <input name="name" placeholder="Citibanamex Oro" required>
+    </label>
+    <label>
+      Banco
+      <input name="bankName" placeholder="Citibanamex">
+    </label>
+    <label>
+      Dia de corte
+      <input name="cutOffDay" type="number" min="1" max="31" required>
+    </label>
+    <label>
+      Dia limite de pago
+      <input name="paymentDueDay" type="number" min="1" max="31" required>
+    </label>
+    <label>
+      Dia en que pagas
+      <select name="preferredPaymentDay" required>
+        <option value="30">30</option>
+        <option value="15">15</option>
+      </select>
+    </label>
+    <div class="form-actions">
+      <button class="button primary" type="submit">Agregar tarjeta</button>
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Tarjeta</th>
+          <th>Banco</th>
+          <th>Corte</th>
+          <th>Limite pago</th>
+          <th>Tu pago</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% cards.forEach((card) => { %>
+          <tr>
+            <td><%= card.name %></td>
+            <td><%= card.bankName || '-' %></td>
+            <td>Dia <%= card.cutOffDay %></td>
+            <td>Dia <%= card.paymentDueDay %></td>
+            <td>Dia <%= card.preferredPaymentDay %></td>
+            <td class="right">
+              <form action="/tarjetas/<%= card.id %>/delete" method="post" onsubmit="return confirm('Eliminar tarjeta?')">
+                <button class="link-button danger" type="submit">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% if (!cards.length) { %><p class="empty">Todavia no tienes tarjetas registradas.</p><% } %>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">Detalle por tarjeta</p>
+      <h2>Deuda registrada</h2>
+    </div>
+    <% if (cards.length) { %>
+      <form class="card-selector" action="/tarjetas" method="get">
+        <label>
+          Ver tarjeta
+          <select name="cardId" onchange="this.form.submit()">
+            <% cards.forEach((card) => { %>
+              <option value="<%= card.id %>" <%= card.id === selectedCardId ? 'selected' : '' %>>
+                <%= card.name %>
+              </option>
+            <% }) %>
+          </select>
+        </label>
+      </form>
+    <% } %>
+  </div>
+
+  <% if (selectedCard) { %>
+    <section class="summary-grid card-summary-grid">
+      <article class="metric">
+        <span>Tarjeta</span>
+        <strong><%= selectedCard.name %></strong>
+      </article>
+      <article class="metric">
+        <span>Mensualidad total</span>
+        <strong><%= money(cardDebtSummary.monthlyTotal) %></strong>
+      </article>
+      <article class="metric">
+        <span>Total registrado</span>
+        <strong><%= money(cardDebtSummary.finiteTotal) %></strong>
+      </article>
+    </section>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Deuda</th>
+            <th>Fecha inicial</th>
+            <th>Pago</th>
+            <th>Siguiente pago</th>
+            <th>Meses</th>
+            <th class="right">Mensualidad</th>
+            <th class="right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cardDebtRows.forEach((debt) => { %>
+            <tr>
+              <td>
+                <%= debt.name %>
+                <% if (debt.isRecurring) { %><span class="tag">Recurrente</span><% } %>
+              </td>
+              <td><%= dateLabel(debt.startDate) %></td>
+              <td>Dia <%= debt.paymentDay %></td>
+              <td><%= debt.nextPaymentDate ? dateLabel(debt.nextPaymentDate) : '-' %></td>
+              <td class="progress-cell">
+                <strong><%= debt.progress.label %></strong>
+                <% if (debt.progress.remainingLabel) { %>
+                  <small><%= debt.progress.remainingLabel %></small>
+                <% } %>
+              </td>
+              <td class="right"><%= money(debt.monthlyAmount) %></td>
+              <td class="right"><%= debt.finiteTotal ? money(debt.finiteTotal) : '-' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if (!cardDebtRows.length) { %>
+      <p class="empty">Esta tarjeta no tiene deudas activas registradas.</p>
+    <% } %>
+  <% } else { %>
+    <p class="empty">Agrega una tarjeta para poder revisar sus deudas.</p>
+  <% } %>
+</section>

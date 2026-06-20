@@ -1,0 +1,64 @@
+<section class="page-header">
+  <div>
+    <p class="eyebrow">Importacion</p>
+    <h1>Estados de cuenta</h1>
+  </div>
+</section>
+
+<section class="panel">
+  <form class="form-grid statements-form" action="/estados" method="post" enctype="multipart/form-data">
+    <label>
+      Tarjeta
+      <select name="creditCardId">
+        <option value="">Sin tarjeta</option>
+        <% cards.forEach((card) => { %>
+          <option value="<%= card.id %>"><%= card.name %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>
+      Fecha del estado de cuenta
+      <input class="latin-date-input" name="statementDate" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" pattern="\d{2}/\d{2}/\d{4}" required>
+    </label>
+    <label>
+      Dia de pago para importados
+      <select name="defaultPaymentDay" required>
+        <option value="30">30</option>
+        <option value="15">15</option>
+      </select>
+    </label>
+    <label class="wide">
+      Archivo PDF
+      <input name="statementFile" type="file" accept="application/pdf,.pdf" required>
+    </label>
+    <div class="form-actions">
+      <button class="button primary" type="submit">Subir y revisar</button>
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Archivo</th>
+          <th>Tarjeta</th>
+          <th>Fecha</th>
+          <th class="right">Compras guardadas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% statements.forEach((statement) => { %>
+          <tr>
+            <td><%= statement.fileName %></td>
+            <td><%= statement.creditCard?.name || '-' %></td>
+            <td><%= dateLabel(statement.statementDate) %></td>
+            <td class="right"><%= statement.purchases.length %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% if (!statements.length) { %><p class="empty">Todavia no has subido estados de cuenta.</p><% } %>
+</section>

@@ -1,0 +1,107 @@
+<section class="page-header">
+  <div>
+    <p class="eyebrow">Registro</p>
+    <h1>Deudas</h1>
+  </div>
+</section>
+
+<section class="panel">
+  <form class="form-grid debts-form" action="/deudas" method="post" data-debt-form>
+    <label>
+      Deuda
+      <input name="name" placeholder="Liverpool, luz, prestamo..." required>
+    </label>
+    <label>
+      Cantidad mensual
+      <input name="monthlyAmount" type="number" min="0" step="0.01" required data-monthly-amount>
+    </label>
+    <label>
+      Meses
+      <input name="months" type="number" min="1" step="1" data-months>
+    </label>
+    <label>
+      Fecha inicial
+      <input class="latin-date-input" name="startDate" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" pattern="\d{2}/\d{2}/\d{4}">
+    </label>
+    <label>
+      Dia de pago
+      <select name="paymentDay" required>
+        <option value="30">30</option>
+        <option value="15">15</option>
+      </select>
+    </label>
+    <label>
+      Tarjeta
+      <select name="creditCardId">
+        <option value="">Sin tarjeta</option>
+        <% cards.forEach((card) => { %>
+          <option value="<%= card.id %>"><%= card.name %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label class="checkbox-row">
+      <input name="isRecurring" type="checkbox" data-recurring>
+      Mostrar mes por mes sin fecha final
+    </label>
+    <label class="wide">
+      Notas
+      <textarea name="notes" rows="2"></textarea>
+    </label>
+    <div class="calculated-total">
+      Total antes de guardar: <strong data-total-preview>$0.00</strong>
+    </div>
+    <div class="form-actions">
+      <button class="button primary" type="submit">Guardar deuda</button>
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Deuda</th>
+          <th>Origen</th>
+          <th>Fecha inicial</th>
+          <th>Pago</th>
+          <th>Meses</th>
+          <th>Tarjeta</th>
+          <th>Notas</th>
+          <th class="right">Mensual</th>
+          <th class="right">Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% debts.forEach((debt) => { %>
+          <tr class="<%= debt.isPaidOff ? 'muted-row' : '' %>">
+            <td>
+              <%= debt.name %>
+              <% if (debt.isRecurring) { %><span class="tag">Recurrente</span><% } %>
+            </td>
+            <td><%= debt.sourceType %></td>
+            <td><%= dateLabel(debt.startDate) %></td>
+            <td>Dia <%= debt.paymentDay %></td>
+            <td><%= debt.isRecurring ? 'Indefinido' : (debt.remainingMonths || debt.months || '-') %></td>
+            <td><%= debt.creditCard?.name || '-' %></td>
+            <td class="notes-cell" title="<%= debt.notes || '' %>"><%= debt.notes || '-' %></td>
+            <td class="right"><%= money(debt.monthlyAmount) %></td>
+            <td class="right"><%= debt.totalAmount ? money(debt.totalAmount) : '-' %></td>
+            <td class="actions-cell">
+              <div class="row-actions">
+                <form action="/deudas/<%= debt.id %>/toggle-paid" method="post">
+                  <button class="link-button" type="submit"><%= debt.isPaidOff ? 'Reactivar' : 'Liquidar' %></button>
+                </form>
+                <form action="/deudas/<%= debt.id %>/delete" method="post" onsubmit="return confirm('Eliminar deuda?')">
+                  <button class="link-button danger" type="submit">Eliminar</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% if (!debts.length) { %><p class="empty">Todavia no tienes deudas registradas.</p><% } %>
+</section>

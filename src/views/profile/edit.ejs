@@ -1,0 +1,32 @@
+<section class="page-header">
+  <div>
+    <p class="eyebrow">Configuracion</p>
+    <h1>Perfil financiero</h1>
+  </div>
+</section>
+
+<section class="panel narrow">
+  <form class="form-grid" action="/perfil" method="post">
+    <label>
+      Nombre
+      <input name="name" value="<%= profile.name %>" required>
+    </label>
+
+    <label>
+      Sueldo mensual
+      <input name="monthlyIncome" type="number" min="0" step="0.01" value="<%= profile.monthlyIncome %>" required>
+    </label>
+
+    <label>
+      Moneda
+      <select name="currency">
+        <option value="MXN" <%= profile.currency === 'MXN' ? 'selected' : '' %>>MXN</option>
+        <option value="USD" <%= profile.currency === 'USD' ? 'selected' : '' %>>USD</option>
+      </select>
+    </label>
+
+    <div class="form-actions">
+      <button class="button primary" type="submit">Guardar perfil</button>
+    </div>
+  </form>
+</section>

@@ -1,0 +1,110 @@
+<section class="page-header">
+  <div>
+    <p class="eyebrow">Periodo de pago</p>
+    <h1><%= projection.periodLabel %></h1>
+  </div>
+  <div class="header-actions">
+    <form class="period-selector" action="/" method="get">
+      <label>
+        Ver periodo
+        <select name="period" onchange="this.form.submit()">
+          <% periodOptions.forEach((option) => { %>
+            <option value="<%= option.index %>" <%= option.index === selectedPeriodIndex ? 'selected' : '' %>>
+              <%= option.label %>
+            </option>
+          <% }) %>
+        </select>
+      </label>
+    </form>
+    <a class="button primary" href="/deudas">Agregar deuda</a>
+  </div>
+</section>
+
+
+<section class="summary-grid">
+  <article class="metric">
+    <span>Sueldo mensual</span>
+    <strong><%= money(projection.income, projection.currency) %></strong>
+  </article>
+  <article class="metric">
+    <span>Total a pagar</span>
+    <strong><%= money(projection.totalToPay, projection.currency) %></strong>
+  </article>
+  <article class="metric <%= projection.balance >= 0 ? 'positive' : 'negative' %>">
+    <span>Resultado</span>
+    <strong><%= money(projection.balance, projection.currency) %></strong>
+  </article>
+</section>
+
+<section class="panel spending-panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">Saldo a favor</p>
+      <h2>Resumen para gastar</h2>
+    </div>
+    <strong class="panel-total"><%= money(projection.spendingSummary.available, projection.currency) %></strong>
+  </div>
+
+  <% if (projection.spendingSummary.items.length) { %>
+    <div class="spending-grid">
+      <% projection.spendingSummary.items.forEach((item) => { %>
+        <article class="spending-item">
+          <span><%= item.label %></span>
+          <strong><%= money(item.amount, projection.currency) %></strong>
+          <small><%= item.percent %>% del saldo a favor</small>
+        </article>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p class="empty">No hay saldo positivo para distribuir en este periodo.</p>
+  <% } %>
+</section>
+
+<section class="two-column">
+  <% projection.buckets.forEach((bucket) => { %>
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Pago dia <%= bucket.day %></p>
+          <h2><%= bucket.label %></h2>
+        </div>
+        <strong class="panel-total"><%= money(bucket.total, projection.currency) %></strong>
+      </div>
+
+      <% if (bucket.items.length) { %>
+        <div class="table-wrap">
+          <table class="dashboard-table">
+            <thead>
+              <tr>
+                <th>Deuda</th>
+                <th>Tarjeta</th>
+                <th>Meses</th>
+                <th class="right">Mensualidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% bucket.items.forEach((item) => { %>
+                <tr>
+                  <td>
+                    <%= item.name %>
+                    <% if (item.isRecurring) { %><span class="tag">Recurrente</span><% } %>
+                  </td>
+                  <td><%= item.cardName || 'Sin tarjeta' %></td>
+                  <td class="progress-cell">
+                    <strong><%= item.progress.label %></strong>
+                    <% if (item.progress.remainingLabel) { %>
+                      <small><%= item.progress.remainingLabel %></small>
+                    <% } %>
+                  </td>
+                  <td class="right"><%= money(item.amount, projection.currency) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="empty">No hay deudas programadas para esta fecha.</p>
+      <% } %>
+    </article>
+  <% }) %>
+</section>

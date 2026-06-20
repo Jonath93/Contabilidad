@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id            Int      @id @default(1)
+  name          String   @default("Usuario")
+  monthlyIncome Decimal  @default(0) @db.Decimal(12, 2)
+  currency      String   @default("MXN")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model CreditCard {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  bankName            String?
+  cutOffDay           Int
+  paymentDueDay       Int
+  preferredPaymentDay Int
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  debts      Debt[]
+  statements Statement[]
+}
+
+model Debt {
+  id              Int       @id @default(autoincrement())
+  name            String
+  sourceType      DebtSource @default(MANUAL)
+  totalAmount     Decimal?  @db.Decimal(12, 2)
+  monthlyAmount   Decimal   @db.Decimal(12, 2)
+  months          Int?
+  remainingMonths Int?
+  startDate       DateTime  @default(now())
+  endDate         DateTime?
+  isRecurring     Boolean   @default(false)
+  paymentDay      Int
+  creditCardId    Int?
+  notes           String?
+  isPaidOff       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  creditCard CreditCard? @relation(fields: [creditCardId], references: [id], onDelete: SetNull)
+}
+
+model Statement {
+  id               Int      @id @default(autoincrement())
+  creditCardId     Int?
+  statementDate    DateTime
+  fileName         String
+  originalFilePath String
+  parsedText       String?
+  createdAt        DateTime @default(now())
+
+  creditCard CreditCard?         @relation(fields: [creditCardId], references: [id], onDelete: SetNull)
+  purchases  StatementPurchase[]
+}
+
+model StatementPurchase {
+  id                 Int      @id @default(autoincrement())
+  statementId        Int
+  description        String
+  purchaseDate       DateTime?
+  totalAmount        Decimal? @db.Decimal(12, 2)
+  monthlyAmount      Decimal  @db.Decimal(12, 2)
+  totalMonths        Int?
+  currentInstallment Int?
+  remainingMonths    Int?
+  isInterestFree     Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  statement Statement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+}
+
+enum DebtSource {
+  MANUAL
+  STATEMENT
+  RECURRING
+}

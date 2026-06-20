@@ -1,0 +1,57 @@
+<section class="page-header">
+  <div>
+    <p class="eyebrow">Revision</p>
+    <h1>Compras detectadas</h1>
+  </div>
+  <a class="button" href="/estados">Cancelar</a>
+</section>
+
+<section class="panel">
+  <% if (candidates.length) { %>
+    <form action="/estados/<%= statement.id %>/purchases" method="post">
+      <div class="table-wrap">
+        <table class="review-table">
+          <thead>
+            <tr>
+              <th>Guardar</th>
+              <th>Descripcion</th>
+              <th>Mensualidad</th>
+              <th>Meses totales</th>
+              <th>Mensualidad actual</th>
+              <th>Meses restantes</th>
+              <th>MSI</th>
+              <th>Pago</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% candidates.forEach((candidate, index) => { %>
+              <tr>
+                <td><input type="checkbox" name="selected" value="<%= index %>" checked></td>
+                <td>
+                  <input name="description" value="<%= candidate.description %>" required>
+                  <small><%= candidate.rawLine %></small>
+                </td>
+                <td><input name="monthlyAmount" type="number" step="0.01" min="0" value="<%= candidate.monthlyAmount %>" required></td>
+                <td><input name="totalMonths" type="number" min="1" value="<%= candidate.totalMonths || '' %>"></td>
+                <td><input name="currentInstallment" type="number" min="1" value="<%= candidate.currentInstallment || '' %>"></td>
+                <td><input name="remainingMonths" type="number" min="1" value="<%= candidate.remainingMonths || '' %>"></td>
+                <td><input type="checkbox" name="isInterestFree" value="<%= index %>" <%= candidate.isInterestFree ? 'checked' : '' %>></td>
+                <td>
+                  <select name="paymentDay">
+                    <option value="30" <%= String(defaultPaymentDay) === '30' ? 'selected' : '' %>>30</option>
+                    <option value="15" <%= String(defaultPaymentDay) === '15' ? 'selected' : '' %>>15</option>
+                  </select>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <div class="form-actions">
+        <button class="button primary" type="submit">Guardar seleccionadas</button>
+      </div>
+    </form>
+  <% } else { %>
+    <p class="empty">No se detectaron compras a meses automaticamente. Puedes agregarlas manualmente desde Deudas.</p>
+  <% } %>
+</section>
