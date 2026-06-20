@@ -12,10 +12,6 @@ Aplicacion local en Node.js, Express, EJS, Prisma y PostgreSQL para registrar de
 
 La conexion local esta en `.env`:
 
-```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ContabilidadApp"
-```
-
 ## Comandos
 
 ```bash
