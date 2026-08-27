@@ -5,28 +5,82 @@
   </div>
 </section>
 
-<section class="panel narrow">
-  <form class="form-grid" action="/perfil" method="post">
-    <label>
-      Nombre
-      <input name="name" value="<%= profile.name %>" required>
-    </label>
+<% if (error) { %><p class="form-message error"><%= error %></p><% } %>
+<% if (saved) { %><p class="form-message success">Perfil y distribución guardados correctamente.</p><% } %>
 
-    <label>
-      Sueldo mensual
-      <input name="monthlyIncome" type="number" min="0" step="0.01" value="<%= profile.monthlyIncome %>" required>
-    </label>
+<form action="/perfil" method="post" data-profile-form>
+  <section class="panel">
+    <div class="form-grid profile-fields">
+      <label>
+        Nombre
+        <input name="name" value="<%= profile.name %>" required>
+      </label>
 
-    <label>
-      Moneda
-      <select name="currency">
-        <option value="MXN" <%= profile.currency === 'MXN' ? 'selected' : '' %>>MXN</option>
-        <option value="USD" <%= profile.currency === 'USD' ? 'selected' : '' %>>USD</option>
-      </select>
-    </label>
+      <label>
+        Sueldo mensual
+        <input name="monthlyIncome" type="number" min="0" step="0.01" value="<%= profile.monthlyIncome %>" required>
+      </label>
 
-    <div class="form-actions">
+      <label>
+        Moneda
+        <select name="currency">
+          <option value="MXN" <%= profile.currency === 'MXN' ? 'selected' : '' %>>MXN</option>
+          <option value="USD" <%= profile.currency === 'USD' ? 'selected' : '' %>>USD</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="panel allocation-editor">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Saldo a favor</p>
+        <h2>Distribución mensual</h2>
+        <small>Esta configuración se copiará al período actual. Los períodos cerrados no se modificarán.</small>
+      </div>
+      <div class="allocation-total" data-allocation-total>100%</div>
+    </div>
+
+    <div class="allocation-list" data-allocation-list>
+      <% profile.spendingAllocations.forEach((allocation) => { %>
+        <div class="allocation-row" data-allocation-row>
+          <label>
+            Concepto
+            <input name="allocationLabel" value="<%= allocation.label %>" maxlength="80" required>
+          </label>
+          <label>
+            Porcentaje
+            <div class="percentage-input">
+              <input name="allocationPercentage" type="number" min="0.01" max="100" step="0.01" value="<%= allocation.percentage %>" required data-allocation-percentage>
+              <span>%</span>
+            </div>
+          </label>
+          <button class="button allocation-remove" type="button" data-remove-allocation>Eliminar</button>
+        </div>
+      <% }) %>
+    </div>
+
+    <template data-allocation-template>
+      <div class="allocation-row" data-allocation-row>
+        <label>
+          Concepto
+          <input name="allocationLabel" maxlength="80" placeholder="Nuevo destino" required>
+        </label>
+        <label>
+          Porcentaje
+          <div class="percentage-input">
+            <input name="allocationPercentage" type="number" min="0.01" max="100" step="0.01" required data-allocation-percentage>
+            <span>%</span>
+          </div>
+        </label>
+        <button class="button allocation-remove" type="button" data-remove-allocation>Eliminar</button>
+      </div>
+    </template>
+
+    <div class="allocation-actions">
+      <button class="button" type="button" data-add-allocation>Agregar concepto</button>
+      <span class="allocation-validation" data-allocation-validation></span>
       <button class="button primary" type="submit">Guardar perfil</button>
     </div>
-  </form>
-</section>
+  </section>
+</form>

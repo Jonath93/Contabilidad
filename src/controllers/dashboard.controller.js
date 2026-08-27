@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const { getProfile } = require("../services/profile.service");
 const { buildFutureProjections } = require("../services/paymentProjection.service");
+const { syncHistory } = require("../services/paymentHistory.service");
 const { money, dateLabel } = require("../services/formatters");
 
 async function index(req, res, next) {
@@ -17,7 +18,9 @@ async function index(req, res, next) {
       })
     ]);
 
-    const futureProjections = buildFutureProjections(debts, profile, new Date(), 12);
+    const today = new Date();
+    await syncHistory(debts, profile, today, true);
+    const futureProjections = buildFutureProjections(debts, profile, today, 12);
     const projection = futureProjections[selectedPeriodIndex];
     const periodOptions = futureProjections.map((period, index) => ({
       index,

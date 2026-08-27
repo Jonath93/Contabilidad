@@ -14,6 +14,20 @@ model UserProfile {
   currency      String   @default("MXN")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  spendingAllocations SpendingAllocation[]
+}
+
+model SpendingAllocation {
+  id         Int     @id @default(autoincrement())
+  profileId  Int
+  label      String
+  percentage Decimal @db.Decimal(5, 2)
+  sortOrder  Int     @default(0)
+
+  profile UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, sortOrder])
 }
 
 model CreditCard {
@@ -31,22 +45,22 @@ model CreditCard {
 }
 
 model Debt {
-  id              Int       @id @default(autoincrement())
+  id              Int        @id @default(autoincrement())
   name            String
   sourceType      DebtSource @default(MANUAL)
-  totalAmount     Decimal?  @db.Decimal(12, 2)
-  monthlyAmount   Decimal   @db.Decimal(12, 2)
+  totalAmount     Decimal?   @db.Decimal(12, 2)
+  monthlyAmount   Decimal    @db.Decimal(12, 2)
   months          Int?
   remainingMonths Int?
-  startDate       DateTime  @default(now())
+  startDate       DateTime   @default(now())
   endDate         DateTime?
-  isRecurring     Boolean   @default(false)
+  isRecurring     Boolean    @default(false)
   paymentDay      Int
   creditCardId    Int?
   notes           String?
-  isPaidOff       Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  isPaidOff       Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   creditCard CreditCard? @relation(fields: [creditCardId], references: [id], onDelete: SetNull)
 }
@@ -65,19 +79,70 @@ model Statement {
 }
 
 model StatementPurchase {
-  id                 Int      @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   statementId        Int
   description        String
   purchaseDate       DateTime?
-  totalAmount        Decimal? @db.Decimal(12, 2)
-  monthlyAmount      Decimal  @db.Decimal(12, 2)
+  totalAmount        Decimal?  @db.Decimal(12, 2)
+  monthlyAmount      Decimal   @db.Decimal(12, 2)
   totalMonths        Int?
   currentInstallment Int?
   remainingMonths    Int?
-  isInterestFree     Boolean  @default(false)
-  createdAt          DateTime @default(now())
+  isInterestFree     Boolean   @default(false)
+  createdAt          DateTime  @default(now())
 
   statement Statement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+}
+
+model PaymentPeriodSnapshot {
+  id          Int      @id @default(autoincrement())
+  periodKey   String   @unique
+  periodStart DateTime
+  periodEnd   DateTime
+  periodLabel String
+  income      Decimal  @db.Decimal(12, 2)
+  currency    String   @default("MXN")
+  totalToPay  Decimal  @db.Decimal(12, 2)
+  balance     Decimal  @db.Decimal(12, 2)
+  isClosed    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       PaymentPeriodSnapshotItem[]
+  allocations PaymentPeriodSnapshotAllocation[]
+}
+
+model PaymentPeriodSnapshotAllocation {
+  id               Int     @id @default(autoincrement())
+  periodSnapshotId Int
+  label            String
+  percentage       Decimal @db.Decimal(5, 2)
+  sortOrder        Int     @default(0)
+
+  periodSnapshot PaymentPeriodSnapshot @relation(fields: [periodSnapshotId], references: [id], onDelete: Cascade)
+
+  @@index([periodSnapshotId, sortOrder])
+}
+
+model PaymentPeriodSnapshotItem {
+  id               Int      @id @default(autoincrement())
+  periodSnapshotId Int
+  debtId           Int?
+  bucketKey        String
+  paymentDate      DateTime
+  paymentDay       Int
+  paymentLabel     String
+  debtName         String
+  cardName         String?
+  amount           Decimal  @db.Decimal(12, 2)
+  isRecurring      Boolean  @default(false)
+  progressLabel    String
+  remainingLabel   String?
+  createdAt        DateTime @default(now())
+
+  periodSnapshot PaymentPeriodSnapshot @relation(fields: [periodSnapshotId], references: [id], onDelete: Cascade)
+
+  @@index([periodSnapshotId, bucketKey])
 }
 
 enum DebtSource {

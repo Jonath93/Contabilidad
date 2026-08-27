@@ -2,6 +2,7 @@
   <a class="brand" href="/">Contabilidad App</a>
   <nav class="nav">
     <a class="<%= currentPath === '/' ? 'active' : '' %>" href="/">Dashboard</a>
+    <a class="<%= currentPath.startsWith('/historial') ? 'active' : '' %>" href="/historial">Historial</a>
     <a class="<%= currentPath.startsWith('/deudas') ? 'active' : '' %>" href="/deudas">Deudas</a>
     <a class="<%= currentPath.startsWith('/estados') ? 'active' : '' %>" href="/estados">Estados</a>
     <a class="<%= currentPath.startsWith('/tarjetas') ? 'active' : '' %>" href="/tarjetas">Tarjetas</a>

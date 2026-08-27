@@ -4,6 +4,7 @@ const isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 require("dayjs/locale/es");
 
 const { toNumber } = require("./formatters");
+const { buildSpendingSummary, normalizeAllocations } = require("./spendingAllocation.service");
 
 dayjs.extend(localeData);
 dayjs.extend(isSameOrBefore);
@@ -173,20 +174,8 @@ function buildProjection(debts, profile, today = new Date()) {
 
   const totalToPay = buckets.reduce((sum, bucket) => sum + bucket.total, 0);
   const balance = income - totalToPay;
-  const spendingSummary = balance > 0
-    ? {
-        available: balance,
-        items: [
-          { label: "Botanas / gasto libre", percent: 40, amount: balance * 0.4 },
-          { label: "Guardar casa", percent: 20, amount: balance * 0.2 },
-          { label: "Guardar boda", percent: 20, amount: balance * 0.2 },
-          { label: "Guardar salud", percent: 20, amount: balance * 0.2 }
-        ]
-      }
-    : {
-        available: balance,
-        items: []
-      };
+  const spendingAllocations = normalizeAllocations(profile?.spendingAllocations);
+  const spendingSummary = buildSpendingSummary(balance, spendingAllocations);
 
   return {
     ...window,
@@ -195,7 +184,8 @@ function buildProjection(debts, profile, today = new Date()) {
     currency,
     totalToPay,
     balance,
-    spendingSummary
+    spendingSummary,
+    spendingAllocations
   };
 }
 

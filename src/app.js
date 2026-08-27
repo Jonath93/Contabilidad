@@ -6,6 +6,7 @@ const debtRoutes = require("./routes/debts.routes");
 const profileRoutes = require("./routes/profile.routes");
 const cardRoutes = require("./routes/cards.routes");
 const statementRoutes = require("./routes/statements.routes");
+const historyRoutes = require("./routes/history.routes");
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/deudas", debtRoutes);
 app.use("/perfil", profileRoutes);
 app.use("/tarjetas", cardRoutes);
 app.use("/estados", statementRoutes);
+app.use("/historial", historyRoutes);
 
 app.use((req, res) => {
   res.status(404).render("layouts/page", {
